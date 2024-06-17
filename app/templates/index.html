@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Events</title>
+</head>
+
+<body>
+    <h1>Webhook Events</h1>
+
+    <div id="events"></div>
+
+    <script>
+        async function getEvents() {
+            try {
+                const res = await fetch("/webhook/events");
+                const data = await res.json();
+
+                console.log(data)
+
+                addToDom(data)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        function addToDom(data) {
+            const eventBox = document.getElementById("events");
+
+            for (let event of data) {
+                let text;
+
+                switch (event.action) {
+                    case "PUSH":
+                        console.log("action", event.action, "working")
+                        text = `${event.author} pushed to ${event.to_branch} on ${event.timestamp}`
+                        break;
+                    case "PULL-REQUEST":
+                        text = `${event.author} submitted a pull request from "staging" to ${event.to_branch} on ${event.timestamp} `
+                        break;
+                    case "MERGE":
+                        text = `${event.author} merged branch "dev" to ${event.to_branch} on ${event.timestamp} `
+                        break;
+                    default:
+                        text = ""
+                }
+
+                const elem = document.createElement("h3");
+                console.log(text)
+                elem.textContent = text;
+                eventBox.appendChild(elem)
+            }
+        }
+
+        getEvents()
+
+        setInterval(() => {
+            getEvents()
+        }, []);
+    </script>
+</body>
+
+</html>

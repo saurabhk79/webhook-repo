@@ -13,10 +13,12 @@ def hello_route():
 
 @webhook.route('/receiver', methods=["POST"])
 def receiver():
+    print("works", request.json)
     data = request.json
     event_type = request.headers.get('X-GitHub-Event')
-    request_id = str(uuid.uuid4())  # Generate a unique request ID
+    request_id = str(uuid.uuid4())
 
+    print(event_type);
     event = {
         "_id": request_id,
         "request_id": request_id,
@@ -67,4 +69,5 @@ def get_events_html():
     events = list(mongo.db.events.find().sort("timestamp", -1).limit(10))
     for event in events:
         event['_id'] = str(event['_id'])
-    return render_template('events.html', events=events)
+
+    return render_template('index.html', events=events)
