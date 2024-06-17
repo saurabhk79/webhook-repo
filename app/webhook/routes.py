@@ -15,14 +15,14 @@ def receiver():
 
     if event_type == "push":
         event = {
-            "event": "PUSH",
+            "action": "PUSH",
             "author": data['pusher']['name'],
             "to_branch": data['ref'].split('/')[-1],
             "timestamp": datetime.datetime.now()
         }
     elif event_type == "pull_request":
         event = {
-            "event": "PULL_REQUEST",
+            "action": "PULL_REQUEST",
             "author": data['pull_request']['user']['login'],
             "from_branch": data['pull_request']['head']['ref'],
             "to_branch": data['pull_request']['base']['ref'],
@@ -30,7 +30,7 @@ def receiver():
         }
     elif event_type == "merge":
         event = {
-            "event": "MERGE",
+            "action": "MERGE",
             "author": data['sender']['login'],
             "from_branch": data['pull_request']['head']['ref'],
             "to_branch": data['pull_request']['base']['ref'],
