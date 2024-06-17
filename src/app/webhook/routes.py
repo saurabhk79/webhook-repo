@@ -4,6 +4,9 @@ import datetime
 
 webhook = Blueprint('webhook', __name__, url_prefix='/webhook')
 
+@webhook.route("/hello", methods=["GET"])
+def hello_route():
+    return "Hello, world!"
 
 @webhook.route('/receiver', methods=["POST"])
 def receiver():
