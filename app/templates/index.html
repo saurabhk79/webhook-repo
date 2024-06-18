@@ -5,11 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webhook Events</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            margin: 0;
+        }
+
+        #events {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h3 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        h3:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        #timer {
+            text-align: center;
+            margin: 20px;
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 
 <body>
     <h1>Webhook Events</h1>
-
+    <div id="timer">Next fetch in: <span id="countdown">15</span> seconds</div>
     <div id="events"></div>
 
     <script>
@@ -18,47 +66,58 @@
                 const res = await fetch("/webhook/events");
                 const data = await res.json();
 
-                console.log(data)
-
-                addToDom(data)
+                addToDom(data);
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         }
 
         function addToDom(data) {
             const eventBox = document.getElementById("events");
+            eventBox.innerHTML = ''; // Clear previous events
 
             for (let event of data) {
                 let text;
+                const formattedTimestamp = new Date(event.timestamp).toLocaleString("en-GB", { timeZone: "UTC", hour12: true });
 
                 switch (event.action) {
                     case "PUSH":
-                        console.log("action", event.action, "working")
-                        text = `${event.author} pushed to ${event.to_branch} on ${event.timestamp}`
+                        text = `${event.author} pushed to ${event.to_branch} on ${formattedTimestamp}`;
                         break;
                     case "PULL-REQUEST":
-                        text = `${event.author} submitted a pull request from "staging" to ${event.to_branch} on ${event.timestamp} `
+                        text = `${event.author} submitted a pull request from ${event.from_branch} to ${event.to_branch} on ${formattedTimestamp}`;
                         break;
                     case "MERGE":
-                        text = `${event.author} merged branch "dev" to ${event.to_branch} on ${event.timestamp} `
+                        text = `${event.author} merged branch "dev" to ${event.to_branch} on ${formattedTimestamp}`;
                         break;
                     default:
-                        text = ""
+                        text = "";
                 }
 
                 const elem = document.createElement("h3");
-                console.log(text)
                 elem.textContent = text;
-                eventBox.appendChild(elem)
+                eventBox.appendChild(elem);
             }
         }
 
-        getEvents()
+        function startTimer() {
+            let countdown = 15;
+            const timerElement = document.getElementById("countdown");
 
-        setInterval(() => {
-            getEvents()
-        }, []);
+            const interval = setInterval(() => {
+                countdown--;
+                timerElement.textContent = countdown;
+
+                if (countdown === 0) {
+                    clearInterval(interval);
+                    getEvents();
+                    startTimer();
+                }
+            }, 1000);
+        }
+
+        getEvents();
+        startTimer();
     </script>
 </body>
 
